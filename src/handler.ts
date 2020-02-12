@@ -17,7 +17,9 @@ export interface Config {
   numberOfReviewers: number
   skipKeywords: string[]
   useReviewGroups: boolean
+  useFoundReviewGroup: boolean
   useAssigneeGroups: boolean
+  useFoundAssigneeGroup: boolean
   reviewGroups: { [key: string]: string[] }
   assigneeGroups: { [key: string]: string[] }
 }
@@ -34,7 +36,9 @@ export async function handlePullRequest(
   const { title, draft, user, number } = context.payload.pull_request
   const {
     skipKeywords,
+    useFoundReviewGroup,
     useReviewGroups,
+    useFoundAssigneeGroup,
     useAssigneeGroups,
     reviewGroups,
     assigneeGroups,

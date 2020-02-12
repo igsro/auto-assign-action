@@ -88,12 +88,40 @@ describe('chooseUsersFromGroups', () => {
       groupB: ['reviewer2'],
     }
     const numberOfReviewers = 1
+    const useFoundReviewGroup = false
 
     // WHEN
-    const list = chooseUsersFromGroups(owner, reviewers, numberOfReviewers)
+    const list = chooseUsersFromGroups(
+      owner,
+      reviewers,
+      numberOfReviewers,
+      useFoundReviewGroup
+    )
 
     // THEN
     expect(list).toEqual(['reviewer1', 'reviewer2'])
+  })
+
+  test("should return one reviewer from the same group with the owner's group", () => {
+    // GIVEN
+    const owner = 'owner'
+    const reviewers = {
+      groupA: ['owner', 'reviewer1'],
+      groupB: ['reviewer2'],
+    }
+    const numberOfReviewers = 1
+    const useFoundReviewGroup = true
+
+    // WHEN
+    const list = chooseUsersFromGroups(
+      owner,
+      reviewers,
+      numberOfReviewers,
+      useFoundReviewGroup
+    )
+
+    // THEN
+    expect(list).toEqual(['reviewer1'])
   })
 
   test('should return one reviewer from each group, including the owner if the owner is the only member of a group', () => {
@@ -104,9 +132,15 @@ describe('chooseUsersFromGroups', () => {
       groupB: ['reviewer2'],
     }
     const numberOfReviewers = 1
+    const useFoundReviewGroup = false
 
     // WHEN
-    const list = chooseUsersFromGroups(owner, reviewers, numberOfReviewers)
+    const list = chooseUsersFromGroups(
+      owner,
+      reviewers,
+      numberOfReviewers,
+      useFoundReviewGroup
+    )
 
     // THEN
     expect(list.length).toEqual(1)
@@ -123,9 +157,15 @@ describe('chooseUsersFromGroups', () => {
       groupD: ['groupD-1', 'groupD-2'],
     }
     const numberOfReviewers = 1
+    const useFoundReviewGroup = false
 
     // WHEN
-    const list = chooseUsersFromGroups(owner, reviewers, numberOfReviewers)
+    const list = chooseUsersFromGroups(
+      owner,
+      reviewers,
+      numberOfReviewers,
+      useFoundReviewGroup
+    )
 
     // THEN
     expect(list.length).toEqual(3)
@@ -142,9 +182,15 @@ describe('chooseUsersFromGroups', () => {
       groupB: [],
     }
     const numberOfReviewers = 1
+    const useFoundReviewGroup = false
 
     // WHEN
-    const list = chooseUsersFromGroups(owner, reviewers, numberOfReviewers)
+    const list = chooseUsersFromGroups(
+      owner,
+      reviewers,
+      numberOfReviewers,
+      useFoundReviewGroup
+    )
 
     // THEN
     expect(list.length).toEqual(1)
@@ -159,9 +205,15 @@ describe('chooseUsersFromGroups', () => {
       groupB: ['owner', 'reviewer1'],
     }
     const numberOfReviewers = 2
+    const useFoundReviewGroup = false
 
     // WHEN
-    const list = chooseUsersFromGroups(owner, reviewers, numberOfReviewers)
+    const list = chooseUsersFromGroups(
+      owner,
+      reviewers,
+      numberOfReviewers,
+      useFoundReviewGroup
+    )
 
     // THEN
     expect(list.length).toEqual(1)
@@ -176,9 +228,15 @@ describe('chooseUsersFromGroups', () => {
       groupB: [],
     }
     const numberOfReviewers = 2
+    const useFoundReviewGroup = false
 
     // WHEN
-    const list = chooseUsersFromGroups(owner, reviewers, numberOfReviewers)
+    const list = chooseUsersFromGroups(
+      owner,
+      reviewers,
+      numberOfReviewers,
+      useFoundReviewGroup
+    )
 
     // THEN
     expect(list.length).toEqual(0)

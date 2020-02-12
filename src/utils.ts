@@ -4,7 +4,14 @@ import * as yaml from 'js-yaml'
 import { Config } from './handler'
 
 export function chooseReviewers(owner: string, config: Config): string[] {
-  const { useReviewGroups, reviewGroups, numberOfReviewers, reviewers } = config
+  const {
+    useReviewGroups,
+    useFoundReviewGroup,
+    reviewGroups,
+    numberOfReviewers,
+    reviewers,
+  } = config
+
   let chosenReviewers: string[] = []
   const useGroups: boolean =
     useReviewGroups && Object.keys(reviewGroups).length > 0
@@ -13,7 +20,8 @@ export function chooseReviewers(owner: string, config: Config): string[] {
     chosenReviewers = chooseUsersFromGroups(
       owner,
       reviewGroups,
-      numberOfReviewers
+      numberOfReviewers,
+      useFoundReviewGroup
     )
   } else {
     chosenReviewers = chooseUsers(reviewers, numberOfReviewers, owner)
@@ -25,6 +33,7 @@ export function chooseReviewers(owner: string, config: Config): string[] {
 export function chooseAssignees(owner: string, config: Config): string[] {
   const {
     useAssigneeGroups,
+    useFoundAssigneeGroup,
     assigneeGroups,
     addAssignees,
     numberOfAssignees,
@@ -48,7 +57,8 @@ export function chooseAssignees(owner: string, config: Config): string[] {
     chosenAssignees = chooseUsersFromGroups(
       owner,
       assigneeGroups,
-      numberOfAssignees || numberOfReviewers
+      numberOfAssignees || numberOfReviewers,
+      useFoundAssigneeGroup
     )
   } else {
     const candidates = assignees ? assignees : reviewers
@@ -95,13 +105,44 @@ export function includesSkipKeywords(
 export function chooseUsersFromGroups(
   owner: string,
   groups: { [key: string]: string[] } | undefined,
-  desiredNumber: number
+  desiredNumber: number,
+  ownerGroup: boolean
 ): string[] {
   let users: string[] = []
+  let ownerGroupName: string = ''
+  if (ownerGroup) {
+    ownerGroupName = foundOwnerGroup(owner, groups)
+    if (ownerGroupName !== '') {
+      // @ts-ignore
+      if (typeof groups[ownerGroupName] != 'undefined') {
+        // @ts-ignore
+        users = users.concat(
+          chooseUsers(groups[ownerGroupName], desiredNumber, owner)
+        )
+      }
+      return users
+    }
+  }
+
   for (const group in groups) {
     users = users.concat(chooseUsers(groups[group], desiredNumber, owner))
   }
   return users
+}
+
+export function foundOwnerGroup(
+  owner: string,
+  groups: { [key: string]: string[] } | undefined
+): string {
+  for (const group in groups) {
+    for (const index in groups[group]) {
+      const user = groups[group][index]
+      if (user === owner) {
+        return group
+      }
+    }
+  }
+  return ''
 }
 
 export async function fetchConfigurationFile(client: github.GitHub, options) {

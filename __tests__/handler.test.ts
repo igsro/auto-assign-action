@@ -529,6 +529,7 @@ describe('handlePullRequest', () => {
       addAssignees: false,
       addReviewers: true,
       useReviewGroups: true,
+      useFoundReviewGroup: false,
       numberOfReviewers: 1,
       reviewGroups: {
         groupA: ['group1-user1', 'group1-user2', 'group1-user3'],
@@ -546,6 +547,47 @@ describe('handlePullRequest', () => {
     )
     expect(createReviewRequestSpy.mock.calls[0][0].reviewers[1]).toMatch(
       /group2/
+    )
+    expect(addAssigneesSpy).not.toBeCalled()
+  })
+
+  test("adds reviewers to pull request from the same group with owner's group ", async () => {
+    const client = new github.GitHub('token')
+
+    // MOCKS
+    client.pulls = {
+      createReviewRequest: jest.fn().mockImplementation(async () => {}),
+    } as any
+    const createReviewRequestSpy = jest.spyOn(
+      client.pulls,
+      'createReviewRequest'
+    )
+
+    client.issues = {
+      addAssignees: jest.fn().mockImplementation(async () => {}),
+    } as any
+    const addAssigneesSpy = jest.spyOn(client.issues, 'addAssignees')
+
+    // GIVEN
+    const config = {
+      addAssignees: false,
+      addReviewers: true,
+      useReviewGroups: true,
+      useFoundReviewGroup: true,
+      numberOfReviewers: 1,
+      reviewGroups: {
+        groupA: ['pr-creator', 'group1-user1', 'group1-user2', 'group1-user3'],
+        groupB: ['group2-user1', 'group2-user2', 'group2-user3'],
+      },
+    } as any
+
+    // WHEN
+    await handler.handlePullRequest(client, context, config)
+
+    // THEN
+    expect(createReviewRequestSpy.mock.calls[0][0].reviewers).toHaveLength(1)
+    expect(createReviewRequestSpy.mock.calls[0][0].reviewers[0]).toMatch(
+      /group1/
     )
     expect(addAssigneesSpy).not.toBeCalled()
   })
@@ -678,6 +720,47 @@ describe('handlePullRequest', () => {
     expect(addAssigneesSpy.mock.calls[0][0].assignees[0]).toMatch(/group1/)
     expect(addAssigneesSpy.mock.calls[0][0].assignees[1]).toMatch(/group2/)
     expect(addAssigneesSpy.mock.calls[0][0].assignees[2]).toMatch(/group3/)
+    expect(createReviewRequestSpy).not.toBeCalled()
+  })
+
+  test("adds assignees to pull request from the same group with owner's group using numberOfReviewers if groups are enabled and number of assignees is not specified", async () => {
+    const client = new github.GitHub('token')
+
+    // MOCKS
+    client.pulls = {
+      createReviewRequest: jest.fn().mockImplementation(async () => {}),
+    } as any
+    const createReviewRequestSpy = jest.spyOn(
+      client.pulls,
+      'createReviewRequest'
+    )
+
+    client.issues = {
+      addAssignees: jest.fn().mockImplementation(async () => {}),
+    } as any
+    const addAssigneesSpy = jest.spyOn(client.issues, 'addAssignees')
+
+    // GIVEN
+    const config = {
+      addAssignees: true,
+      addReviewers: false,
+      useAssigneeGroups: true,
+      useFoundAssigneeGroup: true,
+      numberOfReviewers: 1,
+      reviewers: ['reviewer1', 'reviewer2', 'reviewer3'],
+      assigneeGroups: {
+        groupA: ['pr-creator', 'group1-user1', 'group1-user2', 'group1-user3'],
+        groupB: ['group2-user1'],
+        groupC: ['group3-user1', 'group3-user2', 'group3-user3'],
+      },
+    } as any
+
+    // WHEN
+    await handler.handlePullRequest(client, context, config)
+
+    // THEN
+    expect(addAssigneesSpy.mock.calls[0][0].assignees).toHaveLength(1)
+    expect(addAssigneesSpy.mock.calls[0][0].assignees[0]).toMatch(/group1/)
     expect(createReviewRequestSpy).not.toBeCalled()
   })
 

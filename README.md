@@ -77,6 +77,9 @@ numberOfReviewers: 1
 # Set to true to add reviewers from different groups to pull requests
 useReviewGroups: true
 
+# Set to true to add reviewers from the same group with the owner's group
+useFoundReviewGroup: true
+
 # A list of reviewers, split into different groups, to be added to pull requests (GitHub user name)
 reviewGroups:
   groupA:
@@ -101,6 +104,9 @@ useAssigneeGroups: false
 #     - assigneeD
 #     - assigneeE
 #     - assigneeF
+
+# Set to true to add assignee from the same group with the owner's group
+#useFoundAssigneeGroup: false
 
 # A list of keywords to be skipped the process that add reviewers if pull requests include it
 # skipKeywords:
